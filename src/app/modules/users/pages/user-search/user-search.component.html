@@ -2,8 +2,62 @@
 
 <div class="container">
   <div class="row">
+    <div class="col-12 mb-5">
+      <form [formGroup]="form" role="form" (ngSubmit)="onSubmit()">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Find github users"
+            aria-label="Find github users" aria-describedby="button-addon2" formControlName="search">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary btn-user-search" type="submit" id="button-addon2">
+              <img src="/assets/images/search.svg" alt="Search user">
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
     <div class="col-12">
-      <p>Pesquisar usuário</p>
+      <ng-container *ngIf="finishedLoading !== undefined">
+        <ng-container *ngIf="finishedLoading; else loading">
+          <ng-container *ngIf="user; else noUser">
+            <div class="card mb-3">
+              <div class="row no-gutters">
+                <ng-container *ngIf="user?.avatar_url">
+                  <div class="col-12 col-lg-2">
+                    <a [routerLink]="['/usuarios', user?.login]">
+                      <img [src]="user?.avatar_url" class="card-img" [alt]="user?.name + ' - @' + user?.login">
+                    </a>
+                  </div>
+                </ng-container>
+                <div class="col-12 col-lg">
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <ng-container *ngIf="user?.name">
+                        <a [routerLink]="['/usuarios', user?.login]">{{ user?.name + ' ' }}</a>
+                      </ng-container>
+                      <a [routerLink]="['/usuarios', user?.login]"><small>@{{ user?.login }}</small></a>
+                    </h5>
+                    <ng-container *ngIf="user?.bio">
+                      <p class="card-text mb-1"><a [routerLink]="['/usuarios', user?.login]">{{ user?.bio }}</a></p>
+                    </ng-container>
+                    <ng-container *ngIf="user?.location">
+                      <p class="card-text"><small class="text-muted">{{ user?.location }}</small></p>
+                    </ng-container>
+                    <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/usuarios', user?.login]">
+                      Ver detalhes
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #noUser>
+            <p>No users found</p>
+          </ng-template>
+        </ng-container>
+        <ng-template #loading>
+          <p>Wait loading...</p>
+        </ng-template>
+      </ng-container>
     </div>
   </div>
 </div>

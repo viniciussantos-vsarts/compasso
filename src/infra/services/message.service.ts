@@ -10,7 +10,6 @@ export class MessageService {
     if (err) {
       new Error('Erro desconhecido');
     }
-
     new Error(String(err));
   }
 }

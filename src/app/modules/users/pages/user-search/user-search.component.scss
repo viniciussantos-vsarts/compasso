@@ -1,0 +1,15 @@
+.btn-user-search {
+  img {
+    width: 20px;
+    height: auto;
+  }
+  &:hover,
+  &:focus {
+    background-color: transparent;
+  }
+  &:not(:disabled):not(.disabled):active,
+  &:not(:disabled):not(.disabled).active,
+  .show > &.dropdown-toggle {
+    background-color: transparent;
+  }
+}

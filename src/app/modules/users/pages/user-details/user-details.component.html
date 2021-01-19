@@ -1,11 +1,162 @@
 <app-header></app-header>
 
-<div class="container">
-  <div class="row">
-    <div class="col-12">
-      <p>Detalhes do usuário</p>
+<ng-container *ngIf="finishedLoading; else loading">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-lg-4 position-sticky">
+        <div class="card">
+          <img [src]="user?.avatar_url" class="card-img" [alt]="user?.name + ' - @' + user?.login">
+          <div class="card-body">
+            <ng-container *ngIf="user?.name">
+              <h5 class="card-title">{{ user?.name }}</h5>
+            </ng-container>
+            <ng-container *ngIf="user?.bio">
+              <p class="card-text" style="line-height: 1;"><small class="text-muted">{{ user?.bio }}</small></p>
+            </ng-container>
+            <p class="card-text" style="line-height: 1;">
+              <small class="text-muted"> <strong>{{ user?.followers }}</strong> followers · <strong>{{ user?.following
+                  }}</strong> following</small>
+            </p>
+          </div>
+          <ul class="list-group list-group-flush">
+            <ng-container *ngIf="user?.login">
+              <li class="list-group-item"><small>@{{ user?.login }}</small></li>
+            </ng-container>
+            <ng-container *ngIf="user?.location">
+              <li class="list-group-item"><small>{{ user?.location }}</small></li>
+            </ng-container>
+            <ng-container *ngIf="user?.blog">
+              <li class="list-group-item"><a [href]="user?.blog" target="_blank"><small>{{ user?.blog }}</small></a>
+              </li>
+            </ng-container>
+          </ul>
+          <div class="card-body">
+            <button type="button" (click)="getRepos()"
+              class="btn btn-outline-secondary btn-sm"><strong>Repos</strong></button>
+            <button type="button" (click)="getStarred()"
+              class="btn btn-outline-secondary btn-sm ml-2"><strong>Starred</strong></button>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-8">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" [ngClass]="{ active: activeTab === 'overview' }" data-toggle="tab" href="#overview"
+              role="tab" aria-controls="overview" [attr.aria-selected]="activeTab === 'overview'"
+              (click)="activeTab = 'overview'">
+              <small><strong>Overview</strong></small>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" [ngClass]="{ active: activeTab === 'repos' }" data-toggle="tab" href="#repos" role="tab"
+              aria-controls="repos" [attr.aria-selected]="activeTab === 'repos'" (click)="getRepos()">
+              <small><strong>Repos</strong></small>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" [ngClass]="{ active: activeTab === 'starred' }" data-toggle="tab" href="#starred"
+              role="tab" aria-controls="starred" [attr.aria-selected]="activeTab === 'starred'" (click)="getStarred()">
+              <small><strong>Starred</strong></small>
+            </a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="tab-active">
+            <div class="my-4">
+              <ng-container *ngIf="tabFinishedLoading !== undefined">
+                <ng-container *ngIf="tabFinishedLoading; else tabLoading">
+                  <ng-container *ngIf="activeTab === 'overview'">
+                  </ng-container>
+                  <ng-container *ngIf="activeTab === 'repos'">
+                    <ng-container *ngIf="repos && repos.length > 0; else noRepos">
+                      <ng-container *ngFor="let item of repos">
+                        <div class="card mb-3">
+                          <div class="card-body">
+                            <h5 class="card-title"><a [href]="item?.html_url" target="_blank">{{ item?.full_name }}</a>
+                            </h5>
+                            <ng-container *ngIf="item?.description">
+                              <p class="card-text"><a [href]="item?.html_url" target="_blank">{{ item?.description
+                                  }}</a></p>
+                            </ng-container>
+                            <p class="card-text">
+                              <small class="text-muted">
+                                <ng-container *ngIf="item?.language">{{ item?.language }}</ng-container>
+                                <ng-container *ngIf="item?.watchers_count"> · ☆ {{ item?.watchers_count }}</ng-container>
+                                <ng-container *ngIf="item?.forks_count"> · ⑂ {{ item?.forks_count }}</ng-container>
+                                <ng-container *ngIf="item?.license"> · ⚖ {{ item?.license.name }}</ng-container>
+                                <ng-container *ngIf="item?.pushed_at"> · Updated on {{ item?.pushed_at | date }}</ng-container>
+                              </small>
+                            </p>
+                          </div>
+                        </div>
+                      </ng-container>
+                      <div class="btn-group d-flex justify-content-center" role="group">
+                        <button type="button" class="btn btn-outline-secondary" (click)="onPagination('prev', 'repos')"
+                          [disabled]="currentPage === 1"><strong>Previous</strong></button>
+                        <button type="button" class="btn btn-outline-secondary" (click)="onPagination('next', 'repos')"
+                          [disabled]="repos.length < itemsPerPage"><strong>Next</strong></button>
+                      </div>
+                    </ng-container>
+                    <ng-template #noRepos>
+                      <p>No record found</p>
+                    </ng-template>
+                  </ng-container>
+                  <ng-container *ngIf="activeTab === 'starred'">
+                    <ng-container *ngIf="starred && starred.length > 0; else noStarred">
+                      <ng-container *ngFor="let item of starred">
+                        <div class="card mb-3">
+                          <div class="card-body">
+                            <h5 class="card-title"><a [href]="item?.html_url" target="_blank">{{ item?.full_name }}</a>
+                            </h5>
+                            <ng-container *ngIf="item?.description">
+                              <p class="card-text"><a [href]="item?.html_url" target="_blank">{{ item?.description
+                                  }}</a></p>
+                            </ng-container>
+                            <p class="card-text">
+                              <small class="text-muted">
+                                <ng-container *ngIf="item?.language">{{ item?.language }}</ng-container>
+                                <ng-container *ngIf="item?.watchers_count"> · ☆ {{ item?.watchers_count }}</ng-container>
+                                <ng-container *ngIf="item?.forks_count"> · ⑂ {{ item?.forks_count }}</ng-container>
+                                <ng-container *ngIf="item?.license"> · ⚖ {{ item?.license.name }}</ng-container>
+                                <ng-container *ngIf="item?.pushed_at"> · Updated on {{ item?.pushed_at | date }}</ng-container>
+                              </small>
+                            </p>
+                          </div>
+                        </div>
+                      </ng-container>
+                      <div class="btn-group d-flex justify-content-center" role="group">
+                        <button type="button" class="btn btn-outline-secondary"
+                          (click)="onPagination('prev', 'starred')"
+                          [disabled]="currentPage === 1"><strong>Previous</strong></button>
+                        <button type="button" class="btn btn-outline-secondary"
+                          (click)="onPagination('next', 'starred')"
+                          [disabled]="starred.length < itemsPerPage"><strong>Next</strong></button>
+                      </div>
+                    </ng-container>
+                    <ng-template #noStarred>
+                      <p>No record found</p>
+                    </ng-template>
+                  </ng-container>
+                </ng-container>
+                <ng-template #tabLoading>
+                  <p>Wait loading...</p>
+                </ng-template>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</ng-container>
+<ng-template #loading>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <p>Wait loading...</p>
+      </div>
+    </div>
+  </div>
+</ng-template>
 
 <app-footer></app-footer>
